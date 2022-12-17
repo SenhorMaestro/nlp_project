@@ -30,16 +30,10 @@ class sentimentLSTM(nn.Module):
     """
     
     def __init__(self, 
-                # объем словаря, с которым мы работаем, размер входа для слоя Embedding
                 vocab_size, 
-                # нейроны полносвязного слоя – у нас бинарная классификация - 1
                 output_size, 
-                # размер выходного эмбеддинга каждый элемент последовательности
-                # будет описан вектором такой размерности
                 embedding_dim, 
-                # размерность hidden state LSTM слоя
                 hidden_dim,
-                # число слоев в LSTM
                 n_layers, 
                 drop_prob=0.5):
         
@@ -66,35 +60,21 @@ class sentimentLSTM(nn.Module):
         batch_size = x.size(0)
         
         embeds = self.embedding(x)
-        # print(f'Embed shape: {embeds.shape}')
         lstm_out, hidden = self.lstm(embeds, hidden)
-        # print(f'lstm_out {lstm_out.shape}')
-        # print(f'hidden {hidden[0].shape}')
-        # print(f'hidden {hidden[1].shape}')
-        #stack up lstm outputs
         lstm_out = lstm_out.contiguous().view(-1, self.hidden_dim)
-        # print(f'lstm out after contiguous: {lstm_out.shape}')
-        # Dropout and fully connected layer
         
         out = self.fc(lstm_out)
         out = self.dropout(out)
-        
-        #sigmoid function
+
         sig_out = self.sigmoid(out)
         
-        # reshape to be batch size first
-        # print(sig_out.shape)
         sig_out = sig_out.view(batch_size, -1)
-        # print(sig_out.shape)
-        # print(f'Sig out before indexing:{sig_out.shape}')
-        sig_out = sig_out[:, -1] # get last batch of labels
-        # print(sig_out.shape)
+
+        sig_out = sig_out[:, -1] 
         
         return sig_out, hidden
     
     def init_hidden(self, batch_size):
-        ''' Hidden state и Cell state инициализируем нулями '''
-        # (число слоев; размер батча, размер hidden state)
         h0 = torch.zeros((self.n_layers,batch_size,self.hidden_dim)).to(device)
         c0 = torch.zeros((self.n_layers,batch_size,self.hidden_dim)).to(device)
         hidden = (h0,c0)
@@ -121,8 +101,8 @@ def cleaning(text:str):
 
 def data_preprocessing(text):
     text = text.lower()
-    text = re.sub('<.*?>', '', text) # Remove HTML from text
-    text = ''.join([c for c in text if c not in punctuation])# Remove punctuation
+    text = re.sub('<.*?>', '', text) 
+    text = ''.join([c for c in text if c not in punctuation])
     text = [word for word in text.split() if word not in stop_words]
     text = [word for word in text if word in vocab_list['Unnamed: 0'].tolist()]
     text = ' '.join(text)

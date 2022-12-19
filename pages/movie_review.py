@@ -122,7 +122,7 @@ st.write('Различные модели для предсказания тог
 
 review = st.text_area(label='Введите сюда ваш отзыв на фильм на английском языке', value = 'Awful movie!!!')
 
-choice = st.radio('Выберите модель', options=['Линейная регрессия', 'LSTM', 'distilBERT'])
+choice = st.radio('Выберите модель', options=['Линейная регрессия', 'LSTM'])
 
 button_pressed = st.button ('Узнать')
 if button_pressed:
@@ -156,5 +156,4 @@ if button_pressed:
         sentiment2 = answer_dict[round(out[0].item())]
 
         st.title(sentiment2)
-    elif choice == 'distilBERT':
-        print('2')
+    
